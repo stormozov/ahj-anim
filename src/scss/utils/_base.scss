@@ -1,0 +1,38 @@
+@use './colors' as color;
+
+body {
+  box-sizing: border-box;
+  background-color: color.$background;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 16px;
+}
+
+#root {
+  padding: 3rem 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+a,
+button {
+  transition: all 0.3s;
+}
+
+h1 {
+  font-size: 2.65rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.header {
+  padding-bottom: 3rem;
+}
+
+.page-title {
+  text-align: center;
+}

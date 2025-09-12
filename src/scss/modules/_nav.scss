@@ -1,0 +1,72 @@
+@use '../utils/colors' as color;
+
+.nav {
+  display: flex;
+  justify-content: center;
+
+  &:not(&--main) {
+    margin-bottom: 1rem;
+
+    .nav__list {
+      display: flex;
+      gap: 1rem;
+
+      color: color.$secondary;
+
+      > li {
+        &:not(:first-child)::before {
+          content: '>';
+          margin-right: 1rem;
+          color: inherit;
+        }
+      }
+    }
+
+    .nav__link {
+      color: inherit;
+
+      &:hover {
+        color: color.$primary;
+      }
+    }
+  }
+
+  &--main {
+    align-items: center;
+
+    height: calc(100vh - 6rem);
+
+    font-size: 28px;
+
+    .nav__list {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+
+      .nav__item {
+        width: 100%;
+
+        .nav__link {
+          display: inline-block;
+
+          padding: 1rem 1.5rem;
+          width: inherit;
+
+          background-color: #fff;
+          border-radius: 8px;
+
+          color: #000;
+          text-align: center;
+
+          &:hover {
+            transform: translateX(0.5rem);
+            background-color: color.$primary;
+            color: color.$light;
+          }
+        }
+      }
+    }
+  }
+}
