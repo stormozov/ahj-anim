@@ -29,6 +29,27 @@ h1 {
   text-transform: uppercase;
 }
 
+ul {
+  &.with-marker {
+    > li {
+      display: flex;
+      align-items: start;
+
+      &::before {
+        content: '•';
+        margin-right: 0.5rem;
+        color: color.$primary;
+      }
+    }
+  }
+}
+
+p {
+  &.with-margin {
+    margin-bottom: 1rem;
+  }
+}
+
 .header {
   padding-bottom: 3rem;
 }
