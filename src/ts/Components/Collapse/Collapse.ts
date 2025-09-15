@@ -1,5 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Класс виджета "Коллапс"
+ *
+ * Виджет "Коллапс" позволяет сворачивать и разворачивать содержимое. Разметка
+ * коллапса реализована в виде Shadow DOM. Тег <ui-collapse> является
+ * контейнером для разметки коллапса.
+ */
 export default class Collapse extends HTMLElement {
   private _shadow: ShadowRoot;
   private _headerButton!: HTMLButtonElement;
@@ -16,10 +23,16 @@ export default class Collapse extends HTMLElement {
     this._init();
   }
 
+  /**
+   * Список атрибутов, за которыми следует наблюдать.
+   */
   static get observedAttributes(): string[] {
     return ['title', 'default-open'];
   }
 
+  /**
+   * Инициализация Виджета
+   */
   private _init(): void {
     // Чтение атрибутов
     const defaultOpenAttr = this.getAttribute('default-open');
@@ -32,18 +45,25 @@ export default class Collapse extends HTMLElement {
     this._updateContentHeight();
   }
 
+  /**
+   * Обработчик событий после монтирования
+   */
   connectedCallback(): void {
-    // Добавляем обработчики событий после монтирования
     this._headerButton.addEventListener('click', () => this.toggle());
     document.addEventListener('keydown', (e) => this._handleKeyDown(e));
   }
 
+  /**
+   * Обработчик событий после размонтирования
+   */
   disconnectedCallback(): void {
-    // Очистка
     this._headerButton.removeEventListener('click', () => this.toggle());
     document.removeEventListener('keydown', (e) => this._handleKeyDown(e));
   }
 
+  /**
+   * Переключение состояния коллапса
+   */
   toggle(): void {
     this._isOpen = !this._isOpen;
     this._updateAriaAttributes();
@@ -57,6 +77,13 @@ export default class Collapse extends HTMLElement {
     }
   }
 
+  /**
+   * Обработчик изменения атрибутов
+   *
+   * @param name - имя изменённого атрибута
+   * @param oldValue - старое значение атрибута
+   * @param newValue - новое значение атрибута
+   */
   attributeChangedCallback(
     name: string,
     oldValue: string,
@@ -71,9 +98,28 @@ export default class Collapse extends HTMLElement {
     }
   }
 
+  /**
+   * Отрисовка разметки в Shadow DOM
+   */
   private _render(): void {
-    // Стили (встроены в Shadow DOM)
+    // Стили, встраиваемые в Shadow DOM
+    const styleElement = this._renderStylesInShadowDOM();
+
+    // Разметка
+    this._renderMarkup(styleElement);
+
+    // Устанавливаем начальное состояние
+    this._updateAriaAttributes();
+    this._updateContentHeight();
+  }
+
+  /**
+   * Отрисовка стилей в Shadow DOM
+   * @returns {HTMLElement} элемент стилей
+   */
+  private _renderStylesInShadowDOM(): HTMLElement {
     const style = document.createElement('style');
+
     style.textContent = `
       :host {
         display: block;
@@ -140,11 +186,18 @@ export default class Collapse extends HTMLElement {
       }
     `;
 
-    // Разметка
+    return style;
+  }
+
+  /**
+   * Отрисовка разметки
+   * @param {HTMLElement} styleElement - элемент стилей
+   */
+  private _renderMarkup(styleElement: HTMLElement): void {
     const template = document.createElement('template');
     template.innerHTML = this._getHTMLTemplate();
 
-    this._shadow.append(style, template.content.cloneNode(true));
+    this._shadow.append(styleElement, template.content.cloneNode(true));
 
     // Получаем элементы
     const headerButton = this._shadow.querySelector('.header');
@@ -162,12 +215,12 @@ export default class Collapse extends HTMLElement {
     if (titleSpan instanceof HTMLSpanElement) {
       titleSpan.textContent = this.getAttribute('title') || '';
     }
-
-    // Устанавливаем начальное состояние
-    this._updateAriaAttributes();
-    this._updateContentHeight();
   }
 
+  /**
+   * Генерация разметки
+   * @returns {string} разметка коллапса
+   */
   private _getHTMLTemplate(): string {
     return `
       <button class="header" aria-expanded="false" aria-controls="${this._generateId()}">
@@ -182,10 +235,21 @@ export default class Collapse extends HTMLElement {
     `;
   }
 
+  /**
+   * Генерация уникального id
+   *
+   * Используется пакет uuidv4 (https://github.com/uuidjs/uuid)
+   *
+   * @returns {string} уникальный id, представленный в виде строки. Например,
+   * "collapse-123e4567-e89b-12d3-a456-426655440000"
+   */
   private _generateId(): string {
     return `collapse-${uuidv4()}`;
   }
 
+  /**
+   * Обновление aria-атрибутов
+   */
   private _updateAriaAttributes(): void {
     if (!this._headerButton || !this._contentWrapper) return;
 
@@ -193,6 +257,9 @@ export default class Collapse extends HTMLElement {
     this._contentWrapper.setAttribute('aria-hidden', String(!this._isOpen));
   }
 
+  /**
+   * Обновление высоты содержимого
+   */
   private _updateContentHeight(): void {
     if (!this._contentWrapper) return;
 
@@ -208,6 +275,10 @@ export default class Collapse extends HTMLElement {
     });
   }
 
+  /**
+   * Вычисление высоты содержимого
+   * @returns {string} высота содержимого
+   */
   private _calculateHeight(): string {
     if (!this._contentWrapper) return '0px';
 
@@ -219,6 +290,10 @@ export default class Collapse extends HTMLElement {
     return height;
   }
 
+  /**
+   * Обработка нажатия клавиши
+   * @param {KeyboardEvent} event - событие нажатия клавиши
+   */
   private _handleKeyDown(event: KeyboardEvent): void {
     // Проверяем, что клавиша нажата на текущий collapse
     if (event.key === 'Enter' || event.key === ' ') {
