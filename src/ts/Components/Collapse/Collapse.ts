@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { createElements } from '../../utils/createElementFunction';
+import { ICreateElementOptions } from '../../shared/interfaces';
 
 /**
  * Класс виджета "Коллапс"
@@ -194,10 +196,9 @@ export default class Collapse extends HTMLElement {
    * @param {HTMLElement} styleElement - элемент стилей
    */
   private _renderMarkup(styleElement: HTMLElement): void {
-    const template = document.createElement('template');
-    template.innerHTML = this._getHTMLTemplate();
-
-    this._shadow.append(styleElement, template.content.cloneNode(true));
+    // Создаём разметку и добавляем в Shadow DOM
+    const template = this._createMarkup();
+    this._shadow.append(styleElement, ...template);
 
     // Получаем элементы
     const headerButton = this._shadow.querySelector('.header');
@@ -219,20 +220,56 @@ export default class Collapse extends HTMLElement {
 
   /**
    * Генерация разметки
-   * @returns {string} разметка коллапса
+   * @returns {HTMLElement[]} массив элементов разметки коллапса
    */
-  private _getHTMLTemplate(): string {
-    return `
-      <button class="header" aria-expanded="false" aria-controls="${this._generateId()}">
-        <span class="title"></span>
-        <span class="arrow" aria-hidden="true">▼</span>
-      </button>
-      <div class="content" id="${this._generateId()}" aria-hidden="true">
-        <div class="content-inner">
-          <slot></slot>
-        </div>
-      </div>
-    `;
+  private _createMarkup(): HTMLElement[] {
+    const contentId = this._generateId();
+
+    const configs: ICreateElementOptions[] = [
+      {
+        tag: 'button',
+        className: 'header',
+        attrs: {
+          'aria-expanded': 'false',
+          'aria-controls': contentId,
+        },
+        children: [
+          {
+            tag: 'span',
+            className: 'title',
+          },
+          {
+            tag: 'span',
+            className: 'arrow',
+            text: '▼',
+            attrs: {
+              'aria-hidden': 'true',
+            },
+          },
+        ],
+      },
+      {
+        tag: 'div',
+        className: 'content',
+        id: contentId,
+        attrs: {
+          'aria-hidden': 'true',
+        },
+        children: [
+          {
+            tag: 'div',
+            className: 'content-inner',
+            children: [
+              {
+                tag: 'slot',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    return createElements(configs);
   }
 
   /**
@@ -269,25 +306,19 @@ export default class Collapse extends HTMLElement {
       return;
     }
 
-    // Запускаем анимацию
+    this._contentWrapper.style.height = '0px';
+    // eslint-disable-next-line
+    this._contentWrapper.offsetHeight; // форсируем reflow
+
     requestAnimationFrame(() => {
-      this._contentWrapper.style.height = this._calculateHeight();
+      this._contentWrapper.style.height = 'auto';
+      const height = this._contentWrapper.scrollHeight + 'px';
+      this._contentWrapper.style.height = '0px';
+
+      requestAnimationFrame(() => {
+        this._contentWrapper.style.height = height;
+      });
     });
-  }
-
-  /**
-   * Вычисление высоты содержимого
-   * @returns {string} высота содержимого
-   */
-  private _calculateHeight(): string {
-    if (!this._contentWrapper) return '0px';
-
-    // Вычисляем высоту содержимого
-    this._contentWrapper.style.height = 'auto'; // временно раскрываем для замера
-    const height = this._contentWrapper.scrollHeight + 'px';
-    this._contentWrapper.style.height = '0px'; // возвращаем обратно
-
-    return height;
   }
 
   /**
