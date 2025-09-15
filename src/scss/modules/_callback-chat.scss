@@ -1,0 +1,143 @@
+@use '../utils/colors' as colors;
+
+.feedback-toggle-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 50px;
+  height: 50px;
+  background-color: colors.$danger;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+  font-size: 1.5rem;
+  color: colors.$light;
+  user-select: none;
+
+  &:hover {
+    transform: scale(1.15) rotate(360deg);
+  }
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.feedback-form-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+
+  overflow: hidden;
+  transition:
+    opacity 100ms linear,
+    height 100ms linear;
+
+  margin-top: 10px;
+  width: 300px;
+  max-width: 90vw;
+
+  background-color: colors.$light;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+  &.collapsed {
+    display: none;
+    opacity: 0;
+    height: 0;
+  }
+
+  &.expanded {
+    display: block;
+    opacity: 1;
+  }
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+
+  // Шапка формы
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 16px 20px;
+
+    border-bottom: 1px solid colors.$light-gray;
+
+    font-size: 1rem;
+    font-weight: 600;
+    color: colors.$text-primary;
+  }
+
+  .close-btn {
+    cursor: pointer;
+    transition: color 100ms linear;
+
+    background: none;
+    border: none;
+
+    font-size: 1.2rem;
+    color: #999;
+
+    &:hover {
+      color: colors.$text-primary;
+    }
+  }
+
+  // Основное содержимое формы
+  .form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  input,
+  textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.8rem;
+
+    &:focus {
+      outline: none;
+      border-color: colors.$primary;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+  }
+
+  textarea {
+    resize: none;
+    min-height: 80px;
+  }
+
+  button[type='submit'] {
+    cursor: pointer;
+
+    padding: 10px;
+    background-color: colors.$success;
+    border: none;
+    border-radius: 4px;
+
+    font-size: 1rem;
+    color: colors.$light;
+
+    &:hover {
+      background-color: colors.$light-green;
+    }
+  }
+}
