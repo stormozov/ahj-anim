@@ -39,11 +39,7 @@ export default class LikerWidget {
    * @private
    */
   private _findElements(elementSelector: string): HTMLElement[] {
-    const elements = document.querySelectorAll(elementSelector);
-    if (elements.length === 0) {
-      throw new Error(`Elements with selector "${elementSelector}" not found`);
-    }
-    return [...elements] as HTMLElement[];
+    return [...document.querySelectorAll<HTMLElement>(elementSelector)];
   }
 
   /**
