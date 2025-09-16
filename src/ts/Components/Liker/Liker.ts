@@ -1,6 +1,12 @@
 import createElement from '../../utils/createElementFunction';
 import { HeartPosition } from './shared/types';
 
+/**
+ * Класс виджета "Лайкер"
+ *
+ * Виджет "Лайкер" позволяет добавлять анимацию появления сердца при клике на
+ * кнопку.
+ */
 export default class LikerWidget {
   private _container: HTMLElement | null = null;
   private _button: HTMLButtonElement;
@@ -11,6 +17,10 @@ export default class LikerWidget {
     'center-right-center-left-center',
   ];
 
+  /**
+   * Конструктор класса
+   * @param {string} containerSelector - Селектор контейнера, в который будет добавлен виджет
+   */
   constructor(containerSelector: string) {
     this._container = this._validateContainer(containerSelector);
 
@@ -20,6 +30,14 @@ export default class LikerWidget {
     this._container.append(this._button);
   }
 
+  /**
+   * Валидация селектора контейнера
+   *
+   * @param {string} containerSelector - Селектор контейнера
+   * @returns {HTMLElement} - Валидный контейнер
+   *
+   * @private
+   */
   private _validateContainer(containerSelector: string): HTMLElement {
     const container = document.querySelector(containerSelector);
     if (container instanceof HTMLElement) return container;
@@ -27,6 +45,14 @@ export default class LikerWidget {
     throw new Error(`Container with id "${containerSelector}" not found`);
   }
 
+  /**
+   * Создание кнопки
+   *
+   * @returns {HTMLButtonElement} - Созданная кнопка
+   * @throws {Error} - Если кнопка не создана
+   *
+   * @private
+   */
   private _createButton(): HTMLButtonElement {
     const button = createElement({
       tag: 'button',
@@ -39,6 +65,11 @@ export default class LikerWidget {
     throw new Error('Button not created');
   }
 
+  /**
+   * Добавление элемента сердца в DOM и присвоение анимации
+   *
+   * @private
+   */
   private _addHeart(): void {
     if (!this._container) return;
 
@@ -55,6 +86,13 @@ export default class LikerWidget {
     this._appendHeartAndSetupCleanup(heart);
   }
 
+  /**
+   * Позиционирование сердца относительно кнопки
+   *
+   * @param {HTMLElement} heart - HTML-элемент сердца
+   *
+   * @private
+   */
   private _applyHeartPosition(heart: HTMLElement): void {
     // Рассчитываем позицию сердца относительно кнопки и контейнера
     const { left, top } = this._calculateHeartPosition(heart);
@@ -63,6 +101,16 @@ export default class LikerWidget {
     heart.style.bottom = `${top}px`;
   }
 
+  /**
+   * Рассчитываем позицию сердца относительно кнопки и контейнера
+   *
+   * @param {HTMLElement} heart - HTML-элемент сердца
+   * @returns {HeartPosition} - Позиция сердца
+   *
+   * @see {@link HeartPosition}
+   *
+   * @private
+   */
   private _calculateHeartPosition(heart: HTMLElement): HeartPosition {
     if (!this._container) return { left: 0, top: 0 };
 
@@ -83,6 +131,13 @@ export default class LikerWidget {
     return { left, top };
   }
 
+  /**
+   * Присваиваем анимацию сердцу
+   *
+   * @param {HTMLElement} heart - HTML-элемент сердца
+   *
+   * @private
+   */
   private _assignHeartAnimation(heart: HTMLElement): void {
     const trajectory =
       this._trajectories[Math.floor(Math.random() * this._trajectories.length)];
@@ -93,6 +148,13 @@ export default class LikerWidget {
     heart.style.animationTimingFunction = 'cubic-bezier(0.6, 0.2, 0.65, 1)'; // ease-out
   }
 
+  /**
+   * Добавляем сердце в DOM и подписываемся на завершение анимации
+   *
+   * @param {HTMLElement} heart - HTML-элемент сердца
+   *
+   * @private
+   */
   private _appendHeartAndSetupCleanup(heart: HTMLElement): void {
     this._container?.append(heart);
 
