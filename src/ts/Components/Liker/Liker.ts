@@ -5,11 +5,10 @@ import { HeartPosition } from './shared/types';
  * Класс виджета "Лайкер"
  *
  * Виджет "Лайкер" позволяет добавлять анимацию появления сердца при клике на
- * кнопку.
+ * элемент.
  */
 export default class LikerWidget {
-  private _container: HTMLElement | null = null;
-  private _button: HTMLButtonElement;
+  private _elements: HTMLElement[] = [];
   private readonly _trajectories: string[] = [
     'center-left-center-right-center',
     'center-center-right-left-center',
@@ -19,114 +18,97 @@ export default class LikerWidget {
 
   /**
    * Конструктор класса
-   * @param {string} containerSelector - Селектор контейнера, в который будет добавлен виджет
+   * @param {string} elementSelector - Селектор элементов, на которые вешаем эффекты
    */
-  constructor(containerSelector: string) {
-    this._container = this._validateContainer(containerSelector);
+  constructor(elementSelector: string) {
+    this._elements = this._findElements(elementSelector);
 
-    this._container.style.position = 'relative';
-
-    this._button = this._createButton();
-    this._container.append(this._button);
-  }
-
-  /**
-   * Валидация селектора контейнера
-   *
-   * @param {string} containerSelector - Селектор контейнера
-   * @returns {HTMLElement} - Валидный контейнер
-   *
-   * @private
-   */
-  private _validateContainer(containerSelector: string): HTMLElement {
-    const container = document.querySelector(containerSelector);
-    if (container instanceof HTMLElement) return container;
-
-    throw new Error(`Container with id "${containerSelector}" not found`);
-  }
-
-  /**
-   * Создание кнопки
-   *
-   * @returns {HTMLButtonElement} - Созданная кнопка
-   * @throws {Error} - Если кнопка не создана
-   *
-   * @private
-   */
-  private _createButton(): HTMLButtonElement {
-    const button = createElement({
-      tag: 'button',
-      className: 'like-button',
-      text: 'Like 👍',
+    this._elements.forEach((element) => {
+      element.style.position = 'relative';
+      element.addEventListener('click', () => this._addHeart(element));
     });
-    button.addEventListener('click', () => this._addHeart());
-    if (button instanceof HTMLButtonElement) return button;
+  }
 
-    throw new Error('Button not created');
+  /**
+   * Поиск элементов по селектору
+   *
+   * @param {string} elementSelector - Селектор элементов
+   * @returns {HTMLElement[]} - Массив найденных элементов
+   * @throws {Error} - Если элементы не были найдены
+   *
+   * @private
+   */
+  private _findElements(elementSelector: string): HTMLElement[] {
+    const elements = document.querySelectorAll(elementSelector);
+    if (elements.length === 0) {
+      throw new Error(`Elements with selector "${elementSelector}" not found`);
+    }
+    return [...elements] as HTMLElement[];
   }
 
   /**
    * Добавление элемента сердца в DOM и присвоение анимации
    *
+   * @param {HTMLElement} clickedElement - Элемент, на который кликнули
+   *
    * @private
    */
-  private _addHeart(): void {
-    if (!this._container) return;
-
+  private _addHeart(clickedElement: HTMLElement): void {
     // 1. Создаем сердце
     const heart = createElement({ tag: 'div', className: 'heart' });
 
-    // 2. Позиционируем сердце относительно кнопки
-    this._applyHeartPosition(heart);
+    // 2. Позиционируем сердце относительно элемента
+    this._applyHeartPosition(heart, clickedElement);
 
     // 3. Присваиваем анимацию сердцу
     this._assignHeartAnimation(heart);
 
     // 4. Добавляем сердце в DOM и подписываемся на завершение анимации
-    this._appendHeartAndSetupCleanup(heart);
+    this._appendHeartAndSetupCleanup(heart, clickedElement);
   }
 
   /**
-   * Позиционирование сердца относительно кнопки
+   * Позиционирование сердца относительно элемента
    *
    * @param {HTMLElement} heart - HTML-элемент сердца
+   * @param {HTMLElement} clickedElement - Элемент, на который кликнули
    *
    * @private
    */
-  private _applyHeartPosition(heart: HTMLElement): void {
-    // Рассчитываем позицию сердца относительно кнопки и контейнера
-    const { left, top } = this._calculateHeartPosition(heart);
+  private _applyHeartPosition(
+    heart: HTMLElement,
+    clickedElement: HTMLElement
+  ): void {
+    // Рассчитываем позицию сердца относительно элемента
+    const { left, top } = this._calculateHeartPosition(heart, clickedElement);
 
     heart.style.left = `${left}px`;
     heart.style.bottom = `${top}px`;
   }
 
   /**
-   * Рассчитываем позицию сердца относительно кнопки и контейнера
+   * Рассчитываем позицию сердца относительно элемента
    *
    * @param {HTMLElement} heart - HTML-элемент сердца
+   * @param {HTMLElement} clickedElement - Элемент, на который кликнули
    * @returns {HeartPosition} - Позиция сердца
    *
    * @see {@link HeartPosition}
    *
    * @private
    */
-  private _calculateHeartPosition(heart: HTMLElement): HeartPosition {
-    if (!this._container) return { left: 0, top: 0 };
+  private _calculateHeartPosition(
+    heart: HTMLElement,
+    clickedElement: HTMLElement
+  ): HeartPosition {
+    const elementRect = clickedElement.getBoundingClientRect();
 
-    const buttonRect = this._button.getBoundingClientRect();
-    const containerRect = this._container.getBoundingClientRect();
-
-    // 🟢 Горизонтальное центрирование: сердце по центру кнопки
+    // Горизонтальное центрирование: сердце по центру элемента
     const HEART_HALF_WIDTH = 15;
-    const left =
-      buttonRect.left -
-      containerRect.left +
-      buttonRect.width / 2 -
-      HEART_HALF_WIDTH;
+    const left = elementRect.width / 2 - HEART_HALF_WIDTH;
 
-    // 🟢 Вертикальное позиционирование: нижний край сердца → верхний край кнопки
-    const top = buttonRect.bottom - containerRect.top - heart.offsetHeight;
+    // Вертикальное позиционирование: нижний край сердца → верхний край элемента
+    const top = -heart.offsetHeight;
 
     return { left, top };
   }
@@ -152,11 +134,15 @@ export default class LikerWidget {
    * Добавляем сердце в DOM и подписываемся на завершение анимации
    *
    * @param {HTMLElement} heart - HTML-элемент сердца
+   * @param {HTMLElement} clickedElement - Элемент, на который кликнули
    *
    * @private
    */
-  private _appendHeartAndSetupCleanup(heart: HTMLElement): void {
-    this._container?.append(heart);
+  private _appendHeartAndSetupCleanup(
+    heart: HTMLElement,
+    clickedElement: HTMLElement
+  ): void {
+    clickedElement.append(heart);
 
     heart.addEventListener('animationend', () => heart.remove(), {
       once: true,

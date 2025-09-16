@@ -8,4 +8,4 @@ if (!customElements.get('collapse')) {
 }
 
 new FeedbackWidget('#root');
-new LikerWidget('.liker-wrapper');
+new LikerWidget('.like-button');
