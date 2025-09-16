@@ -1,0 +1,29 @@
+@use '../utils/keyframes';
+
+.like-button {
+  cursor: pointer;
+  transition: transform 0.1s ease;
+
+  padding: 10px 20px;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 6px;
+
+  font-size: 16px;
+  color: white;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.heart {
+  position: absolute;
+  opacity: 1;
+  transform-origin: center bottom;
+
+  width: 30px;
+  height: 30px;
+  background-image: url('../assets/images/heart.png');
+  background-size: cover;
+}

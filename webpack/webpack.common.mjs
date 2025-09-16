@@ -47,7 +47,14 @@ export default {
         test: /\.s[ac]ss$/i,
         use: [
           MiniCssExtractPlugin.loader,
-          'css-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 2,
+              url: true,
+              esModule: false,
+            },
+          },
           {
             loader: 'postcss-loader',
             options: {
@@ -93,18 +100,6 @@ export default {
     ...htmlPlugins,
     new MiniCssExtractPlugin({
       filename: 'style.[name].[contenthash].css',
-    }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: path.resolve(import.meta.dirname, '../src/assets/images'),
-          to: path.resolve(import.meta.dirname, '../dist/assets/images'),
-          globOptions: {
-            ignore: ['**/.DS_Store'],
-          },
-          noErrorOnMissing: true,
-        },
-      ],
     }),
     new Dotenv(),
     ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
